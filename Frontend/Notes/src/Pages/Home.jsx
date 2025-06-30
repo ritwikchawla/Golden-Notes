@@ -14,6 +14,7 @@ import {
 import { Image, Upload, Save, Trash2 } from "react-feather";
 
 function Home() {
+  const apiUrl = import.meta.env.VITE_API_URL;
   const [notes, setNotes] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +27,7 @@ function Home() {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get("http://127.0.0.1:8000/api/profile/", {
+      const res = await axios.get(`${apiUrl}/api/profile/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -38,7 +39,7 @@ function Home() {
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error("Cannot fetch notes api", error);
-      setError(error.response?.data?.message || "Failed to fetch notes");
+      setError(error.response?.data?.message || "Login to add notes !");
     } finally {
       setLoading(false);
     }
@@ -48,7 +49,7 @@ function Home() {
     try {
       setError(null);
       const res = await axios.post(
-        "http://127.0.0.1:8000/api/profile/addnote",
+        `${apiUrl}/api/profile/addnote`,
         {
           email: user.Email,
           title: inputValue.title,
@@ -66,14 +67,17 @@ function Home() {
       fetchNotes(); // Refresh the notes list
     } catch (error) {
       console.error("Cannot add note", error);
-      setError(error.response?.data?.message || "Failed to add note");
+      setError(
+        error.response?.data?.message ||
+          "Failed to add the note. Please make sure you log in!"
+      );
     }
   };
 
   const handleDelete = async (noteId) => {
     try {
       setError(null);
-      await axios.delete(`http://127.0.0.1:8000/api/profile/${noteId}`, {
+      await axios.delete(`${apiUrl}/api/profile/${noteId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

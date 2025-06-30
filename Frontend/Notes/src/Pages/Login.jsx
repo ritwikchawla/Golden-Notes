@@ -10,12 +10,14 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle login logic here
     // console.log({ email, password, rememberMe });
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/login/", {
+      const res = await axios.post(`${apiUrl}/api/login/`, {
         email: email,
         password: password,
       });

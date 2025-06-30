@@ -173,7 +173,7 @@ const Header = () => {
                 </>
               ) : (
                 <>
-                  <button
+                  {/* <button
                     className="btn btn-link text-dark me-2"
                     onClick={() => setDarkMode(!darkMode)}
                     aria-label="Toggle theme"
@@ -183,7 +183,7 @@ const Header = () => {
                     ) : (
                       <Moon size={20} />
                     )}
-                  </button>
+                  </button> */}
 
                   <Link
                     className="btn btn-warning text-white d-flex align-items-center"
@@ -247,7 +247,7 @@ const Header = () => {
 
           {/* Mobile Menu Items */}
           <div className="d-flex justify-content-between">
-            <button
+            {/* <button
               className="btn btn-link text-dark"
               onClick={() => setDarkMode(!darkMode)}
               aria-label="Toggle theme"
@@ -257,7 +257,7 @@ const Header = () => {
               ) : (
                 <Moon size={20} className="me-2" />
               )}
-            </button>
+            </button> */}
 
             {token ? (
               <button

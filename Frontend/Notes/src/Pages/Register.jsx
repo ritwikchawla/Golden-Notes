@@ -17,6 +17,8 @@ function Register() {
   const [apiError, setApiError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -54,10 +56,7 @@ function Register() {
     setIsLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://127.0.0.1:8000/api/register/",
-        formData
-      );
+      const res = await axios.post(`${apiUrl}/api/register/`, formData);
 
       console.log("Registration successful:", res.data);
       navigate("/login", { state: { registrationSuccess: true } });

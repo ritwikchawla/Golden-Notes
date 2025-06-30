@@ -6,8 +6,6 @@ from .serializers import UserSerializer,NoteSerializer
 from rest_framework_simplejwt.tokens import RefreshToken,TokenError
 from .models import User,Notes
 
-
-
 # MAIN HOME VIEW FOR URL = '/', HTTP METHOD = GET
 @api_view(['GET','POST','PUT','DELETE'])
 def home(request):
@@ -66,7 +64,6 @@ def logout(request):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     return Response({"message": "Bad HTTP request made."}, status=status.HTTP_400_BAD_REQUEST)
     
-
 
 # -------------------------------------------------------------------------------- CRUD FUNCTIONALITY --------------------------------------------------------------------------------
 # PROFILE VIEW FOR URL = 'profile/', HTTP METHOD = GET, DATA IN auth header bearer token  = 'refresh'
