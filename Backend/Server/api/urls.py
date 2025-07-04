@@ -10,3 +10,5 @@ urlpatterns = [
     path('profile/addnote', views.addNote),
     path('profile/<int:id>', views.updateDelete),
 ]
+
+

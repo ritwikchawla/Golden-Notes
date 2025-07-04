@@ -66,6 +66,8 @@ def logout(request):
     
 
 # -------------------------------------------------------------------------------- CRUD FUNCTIONALITY --------------------------------------------------------------------------------
+
+# GET ALL NOTES 
 # PROFILE VIEW FOR URL = 'profile/', HTTP METHOD = GET, DATA IN auth header bearer token  = 'refresh'
 @api_view(['GET'])
 @authentication_classes([])  # Disabling default auth
@@ -92,7 +94,8 @@ def getNotes(request):
             notes_list.append({
                 "id":note.id,
                 "title": note.title,
-                "description": note.description
+                "description": note.description,
+                "image": note.image.url if note.image else None
             })
 
         return Response({
@@ -112,6 +115,8 @@ def getNotes(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+# ADD_NOTE 
+# PROFILE VIEW FOR URL = 'profile/addnote', HTTP METHOD = POST, DATA - email,title,description and image (optional) IN auth header bearer token  = 'refresh'
 @api_view(['POST'])
 @authentication_classes([])  # Disabling default auth
 @permission_classes([])      # Disabling default permission
@@ -129,7 +134,7 @@ def addNote(request):
         user_id = token['user_id']  # or 'user' depending on your payload
 
         user = User.objects.get(id=user_id)
-        new_note = NoteSerializer(data=request.data)
+        new_note = NoteSerializer(data = request.data)
         if new_note.is_valid():
             new_note.save()
         return Response(new_note.data,status=status.HTTP_201_CREATED)    
@@ -141,6 +146,9 @@ def addNote(request):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)    
 
 
+# UPDATE_DELETE_NOTE 
+# PROFILE VIEW FOR URL = 'profile/id', HTTP METHOD = PUT , DATA - email,title,description and image (optional) IN auth header bearer token  = 'refresh'
+# PROFILE VIEW FOR URL = 'profile/id', HTTP METHOD = DELETE, auth header bearer token  = 'refresh'
 @api_view(['PUT','DELETE'])
 @authentication_classes([])  # Disabling default auth
 @permission_classes([])      # Disabling default permission

@@ -16,3 +16,4 @@ class Notes(models.Model):
     email = models.EmailField(max_length=100)
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='notes_images/', blank=True, null=True)

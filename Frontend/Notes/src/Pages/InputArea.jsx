@@ -1,11 +1,15 @@
 import React, { useRef, useState } from "react";
-import { Image, Upload, Save, Trash2 } from "react-feather";
+import { Image, Upload, Save, Trash2, X } from "react-feather";
+import { Button, Form, Alert, Spinner } from "react-bootstrap";
 
 function InputArea({ onAdd }) {
   const [inputValue, setInputValue] = useState({
     title: "",
     description: "",
+    image: null,
   });
+  const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleImageUpload = () => {
@@ -13,10 +17,36 @@ function InputArea({ onAdd }) {
   };
 
   const handleFileChange = (e) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      console.log("Selected file:", files[0]);
-      // Handle file upload logic here
+    const file = e.target.files[0];
+    if (file) {
+      // Validate image size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image size should be less than 5MB");
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.match("image.*")) {
+        setError("Only image files are allowed");
+        return;
+      }
+
+      setError(null);
+      setInputValue((prev) => ({
+        ...prev,
+        image: file,
+      }));
+    }
+  };
+
+  const removeImage = () => {
+    setInputValue((prev) => ({
+      ...prev,
+      image: null,
+    }));
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -28,84 +58,165 @@ function InputArea({ onAdd }) {
     }));
   };
 
-  const handleSubmit = () => {
-    if (
-      inputValue.title.trim() === "" ||
-      inputValue.description.trim() === ""
-    ) {
-      alert("Please enter both title and description");
+  const handleSubmit = async () => {
+    if (inputValue.title.trim() === "") {
+      setError("Title is required");
       return;
     }
-    onAdd(inputValue);
-    setInputValue({ title: "", description: "" });
+
+    if (inputValue.description.trim() === "") {
+      setError("Description is required");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      await onAdd(inputValue);
+      // Reset form after successful submission
+      setInputValue({
+        title: "",
+        description: "",
+        image: null,
+      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      // Error handling is done in the parent component
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClear = () => {
-    setInputValue({ title: "", description: "" });
+    setInputValue({
+      title: "",
+      description: "",
+      image: null,
+    });
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
     <div className="container mt-4">
       <div className="card shadow-sm">
         <div className="card-body">
+          {error && (
+            <Alert variant="danger" onClose={() => setError(null)} dismissible>
+              {error}
+            </Alert>
+          )}
+
           {/* Title Input */}
-          <div className="mb-3">
-            <input
+          <Form.Group className="mb-3">
+            <Form.Control
               type="text"
-              className="form-control form-control-lg"
-              placeholder="Enter title (Eg. Buy groceries)"
+              size="lg"
+              placeholder="Enter title (e.g., Buy groceries)"
               value={inputValue.title}
               name="title"
               onChange={handleChange}
+              isInvalid={error && error.includes("Title")}
             />
-          </div>
+          </Form.Group>
 
-          {/* Description Textarea with Media Button */}
-          <div className="mb-3 position-relative">
-            <textarea
-              className="form-control"
-              rows="5"
-              placeholder="1. Buy eggs 2. Buy vegetables"
+          {/* Description Textarea */}
+          <Form.Group className="mb-3">
+            <Form.Control
+              as="textarea"
+              rows={5}
+              placeholder="1. Buy eggs\n2. Buy vegetables"
               value={inputValue.description}
               name="description"
               onChange={handleChange}
-            ></textarea>
-            <button
-              className="btn btn-sm btn-outline-secondary position-absolute"
-              style={{ bottom: "10px", right: "10px" }}
+              isInvalid={error && error.includes("Description")}
+            />
+          </Form.Group>
+
+          {/* Image Preview and Upload */}
+          <div className="mb-3">
+            {inputValue.image && (
+              <div className="mb-2 position-relative">
+                <div className="d-flex align-items-center bg-light p-2 rounded">
+                  <Image size={16} className="text-muted me-2" />
+                  <span className="text-truncate">{inputValue.image.name}</span>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="ms-auto text-danger p-0"
+                    onClick={removeImage}
+                    title="Remove image"
+                  >
+                    <X size={16} />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <Button
+              variant="outline-secondary"
+              size="sm"
               onClick={handleImageUpload}
-              title="Add media"
-              type="button"
+              className="d-flex align-items-center"
             >
-              <Image size={16} />
-            </button>
-            <input
+              <Image size={16} className="me-1" />
+              {inputValue.image ? "Change Image" : "Add Image"}
+            </Button>
+            <Form.Control
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept="image/*, video/*"
+              accept="image/*"
               className="d-none"
             />
+            <Form.Text className="text-muted">
+              Max file size: 5MB (JPEG, PNG)
+            </Form.Text>
           </div>
 
           {/* Action Buttons */}
           <div className="d-flex justify-content-between align-items-center">
-            <button
-              className="btn btn-outline-danger"
+            <Button
+              variant="outline-danger"
               onClick={handleClear}
-              disabled={!inputValue.title && !inputValue.description}
+              disabled={
+                (!inputValue.title &&
+                  !inputValue.description &&
+                  !inputValue.image) ||
+                isSubmitting
+              }
             >
               <Trash2 size={16} className="me-1" />
               Clear
-            </button>
-            <button
-              className="btn btn-primary"
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSubmit}
-              disabled={!inputValue.title || !inputValue.description}
+              disabled={
+                !inputValue.title || !inputValue.description || isSubmitting
+              }
             >
-              <Save size={16} className="me-1" />
-              Save
-            </button>
+              {isSubmitting ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    className="me-1"
+                  />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save size={16} className="me-1" />
+                  Save Note
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
